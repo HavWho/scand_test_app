@@ -1,4 +1,4 @@
-import 'package:scand_test_app/core/models/charging_state.dart';
+import 'package:scand_test_app/core/states/charging_state.dart';
 
 class BatteryInfo {
   final int chargePercent;
