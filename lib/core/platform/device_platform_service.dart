@@ -11,6 +11,6 @@ abstract class DevicePlatformService {
 
   Stream<DeviceEvent> observeEvents();
 
-  Future<void> startMonitoring(Duration interval);
+  Future<void> startMonitoring();
   Future<void> stopMonitoring();
 }

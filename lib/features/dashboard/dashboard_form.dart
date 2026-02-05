@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scand_test_app/core/models/models.dart';
 import 'package:scand_test_app/core/states/charging_state.dart';
+import 'package:scand_test_app/core/widgets/app_container.dart';
 import 'package:scand_test_app/features/dashboard/bloc/dashboard_bloc.dart';
 import 'package:scand_test_app/features/dashboard/bloc/dashboard_state.dart';
-import 'package:scand_test_app/features/dashboard/widgets/grid_view_container.dart';
+import 'package:scand_test_app/features/details/details_screen.dart';
 
 import 'bloc/dashboard_events.dart';
 
@@ -18,7 +19,8 @@ class DashboardForm extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Center(child: Text('Miashok SC& Test App')),
+        centerTitle: true,
+        title: Text('Miashok SC& Test App'),
         backgroundColor: Colors.cyan,
       ),
       body: Padding(
@@ -91,7 +93,7 @@ class DashboardForm extends StatelessWidget {
                   BlocSelector<DashboardBloc, DashboardState, DeviceInfo>(
                     selector: (state) => state.device,
                     builder: (context, device) {
-                      return GridViewContainer(
+                      return AppContainer(
                         child: Center(
                           child: Text(
                             '${device.deviceVendor.toUpperCase()} ${device.deviceModel}\n OS - ${device.osName} ${device.osVersion}',
@@ -102,52 +104,68 @@ class DashboardForm extends StatelessWidget {
                       );
                     },
                   ),
-                  GridViewContainer(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        BlocSelector<DashboardBloc, DashboardState, int>(
-                          selector: (state) => state.battery.chargePercent,
-                          builder: (context, chargePercent) {
-                            return Text(
-                              chargePercent.toString(),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 24),
-                            );
-                          },
-                        ),
-                        BlocSelector<DashboardBloc, DashboardState, ChargingState>(
-                          selector: (state) => state.battery.chargingState,
-                          builder: (context, chargingState) {
-                            return Text(
-                              chargingState.name,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 24),
-                            );
-                          },
-                        ),
-                        BlocSelector<DashboardBloc, DashboardState, bool>(
-                          selector: (state) => state.isPowerSavingEnabled,
-                          builder: (context, isPowerSavingEnabled) {
-                            return Text(
-                              isPowerSavingEnabled ? 'PS Enabled' : 'PS Disabled',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 24),
-                            );
-                          },
-                        ),
-                      ],
+                  InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const DetailsScreen(dataType: 'battery')),
+                      );
+                    },
+                    child: AppContainer(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          BlocSelector<DashboardBloc, DashboardState, int>(
+                            selector: (state) => state.battery.chargePercent,
+                            builder: (context, chargePercent) {
+                              return Text(
+                                chargePercent.toString(),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 24),
+                              );
+                            },
+                          ),
+                          BlocSelector<DashboardBloc, DashboardState, ChargingState>(
+                            selector: (state) => state.battery.chargingState,
+                            builder: (context, chargingState) {
+                              return Text(
+                                chargingState.name,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 24),
+                              );
+                            },
+                          ),
+                          BlocSelector<DashboardBloc, DashboardState, bool>(
+                            selector: (state) => state.isPowerSavingEnabled,
+                            builder: (context, isPowerSavingEnabled) {
+                              return Text(
+                                isPowerSavingEnabled ? 'PS Enabled' : 'PS Disabled',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 24),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   BlocSelector<DashboardBloc, DashboardState, NetworkInfo>(
                     selector: (state) => state.network,
                     builder: (context, network) {
-                      return GridViewContainer(
-                        child: Center(
-                          child: Text(
-                            '${network.isOnline ? 'Online' : 'Offline'}\n${network.type.title}',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 24),
+                      return InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const DetailsScreen(dataType: 'network'),
+                            ),
+                          );
+                        },
+                        child: AppContainer(
+                          child: Center(
+                            child: Text(
+                              '${network.isOnline ? 'Online' : 'Offline'}\n${network.type.title}',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 24),
+                            ),
                           ),
                         ),
                       );
@@ -156,12 +174,21 @@ class DashboardForm extends StatelessWidget {
                   BlocSelector<DashboardBloc, DashboardState, BluetoothInfo>(
                     selector: (state) => state.bluetooth,
                     builder: (context, bluetooth) {
-                      return GridViewContainer(
-                        child: Center(
-                          child: Text(
-                            bluetooth.state.name,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 24),
+                      return InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const DetailsScreen(dataType: 'bluetooth'),
+                            ),
+                          );
+                        },
+                        child: AppContainer(
+                          child: Center(
+                            child: Text(
+                              bluetooth.state.name,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 24),
+                            ),
                           ),
                         ),
                       );

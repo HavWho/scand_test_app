@@ -2,21 +2,22 @@ package com.example.scand_test_app.monitor
 
 import android.content.Context
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
 class DeviceMonitorPlugin(
-    private val context: Context,
-    messenger: BinaryMessenger
+    private val context: Context, messenger: BinaryMessenger
 ) : MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
 
-    private val methodChannel =
-        MethodChannel(messenger, "scand_mobile_monitor/methods")
+    private val methodChannel = MethodChannel(messenger, "scand_mobile_monitor/methods")
 
-    private val eventChannel =
-        EventChannel(messenger, "scand_mobile_monitor/events")
+    private val eventChannel = EventChannel(messenger, "scand_mobile_monitor/events")
+
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     init {
         methodChannel.setMethodCallHandler(this)
@@ -55,21 +56,33 @@ class DeviceMonitorPlugin(
         when (call.method) {
 
             "getDeviceInfo" -> {
-                result.success(getDeviceInfo())
+                mainHandler.post { result.success(getDeviceInfo()) }
+            }
+
+            "getBatteryInfo" -> {
+                mainHandler.post { result.success(batteryMonitor.currentState()) }
+            }
+
+            "getBluetoothInfo" -> {
+                mainHandler.post { result.success(bluetoothMonitor.currentState()) }
+            }
+
+            "getNetworkInfo" -> {
+                mainHandler.post { result.success(networkMonitor.currentState()) }
             }
 
             "getCurrentState" -> {
-                result.success(getCurrentStateSnapshot())
+                mainHandler.post { result.success(getCurrentStateSnapshot()) }
             }
 
             "startMonitoring" -> {
                 startMonitoring()
-                result.success(null)
+                mainHandler.post { result.success(null) }
             }
 
             "stopMonitoring" -> {
                 stopMonitoring()
-                result.success(null)
+                mainHandler.post { result.success(null) }
             }
 
             else -> result.notImplemented()
@@ -89,7 +102,7 @@ class DeviceMonitorPlugin(
     }
 
     private fun sendEvent(event: Map<String, Any>) {
-        eventSink?.success(event)
+        mainHandler.post { eventSink?.success(event) }
     }
 
     // -----------------------------
@@ -114,20 +127,18 @@ class DeviceMonitorPlugin(
     // Snapshot
     // -----------------------------
 
-    private fun getDeviceInfo(): Map<String, Any> =
-        mapOf(
-            "vendor" to Build.MANUFACTURER,
-            "model" to Build.MODEL,
-            "osName" to "Android",
-            "osVersion" to Build.VERSION.RELEASE
-        )
+    private fun getDeviceInfo(): Map<String, Any> = mapOf(
+        "vendor" to Build.MANUFACTURER,
+        "model" to Build.MODEL,
+        "osName" to "Android",
+        "osVersion" to Build.VERSION.RELEASE
+    )
 
-    private fun getCurrentStateSnapshot(): Map<String, Any> =
-        mapOf(
-            "deviceInfo" to getDeviceInfo(),
-            "battery" to batteryMonitor.currentState(),
-            "network" to networkMonitor.currentState(),
-            "powerSaving" to powerSavingMonitor.isEnabled(),
-            "bluetooth" to bluetoothMonitor.currentState()
-        )
+    private fun getCurrentStateSnapshot(): Map<String, Any> = mapOf(
+        "deviceInfo" to getDeviceInfo(),
+        "battery" to batteryMonitor.currentState(),
+        "network" to networkMonitor.currentState(),
+        "powerSaving" to powerSavingMonitor.isEnabled(),
+        "bluetooth" to bluetoothMonitor.currentState()
+    )
 }

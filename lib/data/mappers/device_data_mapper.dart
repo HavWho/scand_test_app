@@ -16,14 +16,24 @@ class DeviceDataMapper {
   }
 
   static DeviceEvent toDeviceEvent(Map<String, dynamic> data) {
-    return switch (data['type']) {
-      'chargePercent' => BatteryLevelChanged(data['value']),
-      'chargingState' => ChargingStateChanged(data['value']),
-      'powerSaving' => PowerSavingModeChanged(data['value']),
-      'network' => NetworkStatusChanged(data['value']),
-      'bluetooth' => BluetoothStateChanged(data['value']),
-      _ => throw UnsupportedError(Strings.unknownEvent),
-    };
+    final type = data['type'];
+    final value = data['value'];
+
+    switch (type) {
+      case 'chargePercent':
+        return BatteryLevelChanged(value);
+      case 'chargingState':
+        return ChargingStateChanged(_mapChargingState(value));
+      case 'powerSaving':
+        return PowerSavingModeChanged(value);
+      case 'network':
+        return NetworkStatusChanged(toNetworkInfo(Map<String, dynamic>.from(value)));
+      case 'bluetooth':
+        return BluetoothStateChanged(BluetoothInfo(state: _mapBluetoothState(value)));
+
+      default:
+        throw UnimplementedError(type);
+    }
   }
 
   static DeviceInfo toDeviceInfo(Map<String, dynamic> data) {
@@ -69,6 +79,8 @@ class DeviceDataMapper {
   static BluetoothState _mapBluetoothState(String value) => switch (value) {
     'on' => const BluetoothOn(),
     'off' => const BluetoothOff(),
+    'turning_on' => const TurningOn(),
+    'turning_off' => const TurningOff(),
     'unavailable' => const BluetoothUnavailable(),
     _ => const BluetoothUnknown(),
   };
